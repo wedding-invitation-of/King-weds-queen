@@ -79,7 +79,7 @@ p,h1,h2,h3,dl,dd,ul,figure{margin:0;padding:0}
 
 /* ---------- Opening ---------- */
 .intro{position:fixed;inset:0;z-index:100;display:grid;place-items:center;overflow:hidden;
-  background:radial-gradient(75% 60% at 50% 42%,#F8F0FA 0%,#E8DAEE 60%,#D5C2DE 100%);
+  background:radial-gradient(75% 60% at 50% 42%,#F9F1F1 0%,#EADEE1 60%,#DCCDD3 100%);
   transition:opacity .7s ease,visibility 0s linear .7s}
 .intro.a-done{opacity:0;visibility:hidden;pointer-events:none}
 .intro.reset,.intro.reset *{transition:none!important;animation:none!important}
@@ -88,7 +88,7 @@ p,h1,h2,h3,dl,dd,ul,figure{margin:0;padding:0}
 .a-in .stage{transition:opacity .7s ease,transform .35s ease-out}
 .cast{position:absolute;left:8%;right:8%;bottom:-3%;height:5%;border-radius:50%;background:radial-gradient(closest-side,rgba(70,45,70,.4),transparent);filter:blur(6px)}
 .env{--u:calc(var(--W) / 100);position:relative;width:var(--W);height:calc(var(--W) * 1.7);perspective:1300px}
-.env-back{position:absolute;inset:0;background:linear-gradient(180deg,#4A2F57,#5E3F6C 50%,#4A2F57)}
+.env-back{position:absolute;inset:0;background:linear-gradient(180deg,#D6C2C8,#E8D8DA 50%,#D6C2C8)}
 .env-back::after{content:"";position:absolute;inset:0;background:var(--noise);opacity:.12;mix-blend-mode:multiply}
 .env-card{position:absolute;inset:0;z-index:2;transform:translateY(5%) scale(.86);
   clip-path:polygon(-9% -14%,109% -14%,50% 47%,50% 47%);
@@ -279,6 +279,12 @@ section{margin-top:14px}
 .replay:hover{background:#FBF6F6}
 footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--mauve-deep)}
 
+/* tap prompt on the opening */
+.tap{position:absolute;left:50%;bottom:max(22px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:8;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;background:none;border:0;cursor:pointer;font-family:var(--font-label);font-weight:600;font-size:11px;letter-spacing:.26em;text-indent:.26em;text-transform:uppercase;white-space:nowrap;color:var(--slate);text-shadow:0 1px 0 rgba(255,255,255,.8)}
+.tap svg{width:18px;height:18px;display:block;color:var(--gold-deep);animation:tapUp 1.3s ease-in-out infinite}
+@keyframes tapUp{0%,100%{transform:translateY(3px);opacity:.55}50%{transform:translateY(-4px);opacity:1}}
+.intro.reset .tap{display:none}
+
 /* music button */
 .music{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:200;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;padding:0;cursor:pointer;color:var(--gold-deep);background:rgba(251,246,245,.92);border:1px solid var(--gold);box-shadow:0 4px 10px -4px rgba(50,30,60,.5)}
 .music svg{width:19px;height:19px;display:block}
@@ -316,6 +322,7 @@ footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-siz
 
 <!-- ============ Opening ============ -->
 <div id="intro" class="intro" role="dialog" aria-label="Invitation opening">
+  <button class="tap" id="tap" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 15l7-7 7 7"/></svg><span>Tap to open</span></button>
   <div class="stage" id="stage">
     <div class="env" id="env">
       <div class="env-back"></div>
@@ -806,7 +813,7 @@ footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-siz
   var LIGHT = [-0.55, -0.65, 0.55];
   function build(name) {
     if (TEX[name]) return;
-    if (name === 'env') TEX.env = shade(blur(heights(royalHeight(560, 952)), 560, 952, 1), 560, 952, { L: LIGHT, base: [124, 84, 146], k: 3, gain: 1.15, shine: 26, spec: 55, specC: [255, 238, 190], irid: 0, grain: 2 });
+    if (name === 'env') TEX.env = shade(blur(heights(royalHeight(560, 952)), 560, 952, 1), 560, 952, { L: LIGHT, base: [238, 223, 225], k: 1.5, gain: 0.8, shine: 22, spec: 45, specC: [255, 248, 252], irid: 0.02, grain: 2 });
     if (name === 'card') { var t = shade(blur(heights(cardHeight(560, 952)), 560, 952, 1), 560, 952, { L: LIGHT, base: [234, 218, 220], k: 3, gain: 1.25, shine: 22, spec: 60, irid: 0.025 }); goldFoil(t, 560, 952); TEX.card = t; }
     if (name === 'mop') TEX.mop = mopTex(420, 380);
     if (name === 'curL') TEX.curL = curtainTex(220, 900, false);
@@ -963,7 +970,7 @@ footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-siz
   window.addEventListener('pointermove', pointer, { passive: true });
 
   /* ====== Music: starts as soon as the ribbon slides away ====== */
-  var bgm = document.getElementById('bgm'), mBtn = document.getElementById('musicBtn'), wantMusic = true, ribbonGone = false, unlocked = false;
+  var bgm = document.getElementById('bgm'), mBtn = document.getElementById('musicBtn'), wantMusic = true, ribbonGone = false, unlocked = false, waiting = false;
   bgm.volume = 0.7;
   function setBtn(on) { mBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
   function tryPlay() {
@@ -975,14 +982,13 @@ footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-siz
   /* any tap before the ribbon is gone only "unlocks" audio silently, so the song can start on time */
   function onGesture(e) {
     if (e && e.target && e.target.closest && e.target.closest('#musicBtn')) return;
-    if (ribbonGone) { tryPlay(); return; }
-    if (unlocked) return; unlocked = true;
-    try {
-      bgm.muted = true;
-      var pr = bgm.play();
-      if (pr && pr.then) pr.then(function () { if (!ribbonGone) { bgm.pause(); bgm.currentTime = 0; } bgm.muted = false; }, function () { bgm.muted = false; });
-      else bgm.muted = false;
-    } catch (err) { bgm.muted = false; }
+    if (waiting) begin();
+    tryPlay();
+  }
+  function begin() {
+    if (!waiting) return; waiting = false; ribbonGone = true;
+    var t = document.getElementById('tap'); if (t) t.hidden = true;
+    run();
   }
   var evs = ['pointerdown', 'touchstart', 'click', 'keydown'];
   function unhook() { evs.forEach(function (n) { document.removeEventListener(n, onGesture, true); }); }
@@ -998,7 +1004,7 @@ footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-siz
   /* ====== Boot ====== */
   try {
     build('env'); build('card'); paint('env'); paint('card');
-    if (reduce) { intro.hidden = true; ribbonGone = true; } else { root.classList.add('lock'); run(); }
+    if (reduce) { intro.hidden = true; ribbonGone = true; } else { root.classList.add('lock'); add('a-in'); waiting = true; later(begin, 9000); }
   } catch (err) { intro.hidden = true; ribbonGone = true; root.classList.remove('lock'); }
   setTimeout(function () { ['curL', 'curR'].forEach(function (n, i) { setTimeout(function () { try { build(n); paint(n); } catch (e) { } }, i * 120); }); }, 700);
 
