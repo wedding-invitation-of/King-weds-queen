@@ -277,6 +277,23 @@ footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-siz
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important;scroll-behavior:auto!important}
   .sparkles{display:none}
 }
+
+/* ---------- Smooth-scroll performance ---------- */
+html{-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+body{-webkit-tap-highlight-color:transparent}
+.sheen{mix-blend-mode:normal;opacity:.55}
+.paper::after{mix-blend-mode:normal;opacity:.04}
+.scene,.kids,.cur,.crown{filter:none}
+.scene.photo{filter:none;box-shadow:0 10px 14px -8px rgba(70,45,80,.45)}
+.cur{box-shadow:6px 0 10px -6px rgba(70,50,80,.3)}
+.off .sparkles i,.off .sheen{animation-play-state:paused}
+.sparkles i{will-change:transform,opacity}
+.page section,.page .paper,.page .mop,.page .band{transform:translateZ(0);backface-visibility:hidden}
+@media (hover:none),(pointer:coarse){
+  html{scroll-behavior:auto}
+  .hero .sheet{transform:none!important;transition:none}
+  .event:hover{transform:none}
+}
 </style>
 </head>
 <body>
@@ -796,6 +813,7 @@ footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-siz
   /* sparkles on every card */
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function addSparkles(host, n) {
+    if (window.matchMedia && matchMedia('(pointer:coarse)').matches) n = Math.max(3, Math.round(n * 0.45));
     var c = host.querySelector(':scope > .sparkles') || host.querySelector(':scope > .scene > .sparkles');
     if (!c) { c = document.createElement('div'); c.className = 'sparkles'; c.setAttribute('aria-hidden', 'true'); host.appendChild(c); }
     for (var i = 0; i < n; i++) {
@@ -814,7 +832,7 @@ footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-siz
   function startFX(canvas, host) {
     var ctx = canvas.getContext('2d'), W = 0, H = 0, parts = [], rockets = [], raf = 0, vis = false, last = 0, nextRocket = 300, nextPop = 1800;
     var cols = ['#FFE9A8', '#F7CAD6', '#FFFFFF', '#D8CCF5', '#F2D27A', '#FFD1A0'];
-    function size() { var r = host.getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1); W = r.width; H = r.height; canvas.width = Math.round(W * d); canvas.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0); }
+    function size() { var r = host.getBoundingClientRect(), d = Math.min(1.5, window.devicePixelRatio || 1); W = r.width; H = r.height; canvas.width = Math.round(W * d); canvas.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0); }
     function burst(x, y) {
       var n = 44 + Math.floor(Math.random() * 20), c1 = cols[Math.floor(Math.random() * cols.length)], c2 = cols[Math.floor(Math.random() * cols.length)];
       for (var i = 0; i < n; i++) { var a = i / n * 6.283 + Math.random() * 0.15, sp = 50 + Math.random() * 90; parts.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0, max: 1.1 + Math.random() * 0.9, c: i % 3 ? c1 : c2, s: 1.4 + Math.random() * 1.4, g: 70, conf: 0 }); }
@@ -847,6 +865,13 @@ footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-siz
     window.addEventListener('resize', function () { if (vis) size(); });
   }
   if (!reduce) { try { startFX(document.getElementById('fx'), document.querySelector('.band')); } catch (e) { } }
+
+
+  /* pause twinkles/glints on cards that are off screen */
+  try {
+    var offIO = new IntersectionObserver(function (es) { es.forEach(function (e) { e.target.classList.toggle('off', !e.isIntersecting); }); }, { rootMargin: '80px' });
+    document.querySelectorAll('.sheet,.paper,.mop,.band,.day-wrap').forEach(function (n) { offIO.observe(n); });
+  } catch (e) { }
 
   /* ====== Opening timeline ====== */
   var sparks = document.getElementById('sparks'), timers = [];
@@ -882,6 +907,7 @@ footer{text-align:center;padding-top:14px;font-family:var(--font-label);font-siz
   document.getElementById('replay').addEventListener('click', play);
 
   function pointer(e) {
+    if (e.pointerType && e.pointerType !== 'mouse') return;
     var w = window.innerWidth, h = window.innerHeight, x = e.clientX / w - 0.5, y = e.clientY / h - 0.5;
     root.style.setProperty('--ry', (x * 14).toFixed(2)); root.style.setProperty('--rx', (-y * 10).toFixed(2));
     root.style.setProperty('--mx', ((x + 0.5) * 100).toFixed(1) + '%'); root.style.setProperty('--my', ((y + 0.5) * 100).toFixed(1) + '%');
